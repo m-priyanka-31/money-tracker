@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Money Tracker - Login</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="form-card">
+
+            <h1>💰 Money Tracker</h1>
+
+            <p class="subtitle">
+                Manage your money together
+            </p>
+
+            <form id="authForm">
+
+                <div id="nameField">
+
+                    <label for="fullName">
+                        Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="fullName"
+                        placeholder="Enter your name"
+                    >
+
+                </div>
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Create a password"
+                    autocomplete="current-password"
+                    minlength="6"
+                    required
+                >
+
+                <button type="submit" id="submitButton">
+                    Create Account
+                </button>
+
+            </form>
+
+            <p id="authMessage"></p>
+
+            <hr>
+
+            <p id="switchText">
+                Already have an account?
+            </p>
+
+            <button
+                id="switchButton"
+                type="button">
+                Login
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- Supabase library -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <script>
+
+        // Create Supabase client
+
+        const supabaseClient = window.supabase.createClient(
+            "https://toqgjgfjfwmojyxbhnma.supabase.co",
+            "sb_publishable_AX6Lhg3YyfRveJ77wSwIZw_4P7dd8xz"
+        );
+
+
+        // Get page elements
+
+        const authForm =
+            document.getElementById("authForm");
+
+        const nameField =
+            document.getElementById("nameField");
+
+        const fullName =
+            document.getElementById("fullName");
+
+        const email =
+            document.getElementById("email");
+
+        const password =
+            document.getElementById("password");
+
+        const submitButton =
+            document.getElementById("submitButton");
+
+        const switchButton =
+            document.getElementById("switchButton");
+
+        const switchText =
+            document.getElementById("switchText");
+
+        const authMessage =
+            document.getElementById("authMessage");
+
+
+        let loginMode = false;
+
+
+        // Switch between Login and Create Account
+
+        switchButton.addEventListener(
+            "click",
+            function () {
+
+                loginMode = !loginMode;
+
+
+                if (loginMode) {
+
+                    nameField.style.display = "none";
+
+                    fullName.required = false;
+
+                    submitButton.textContent = "Login";
+
+                    switchText.textContent =
+                        "Don't have an account?";
+
+                    switchButton.textContent =
+                        "Create Account";
+
+                    password.placeholder =
+                        "Enter your password";
+
+                    password.autocomplete =
+                        "current-password";
+
+                } else {
+
+                    nameField.style.display = "block";
+
+                    fullName.required = true;
+
+                    submitButton.textContent =
+                        "Create Account";
+
+                    switchText.textContent =
+                        "Already have an account?";
+
+                    switchButton.textContent =
+                        "Login";
+
+                    password.placeholder =
+                        "Create a password";
+
+                    password.autocomplete =
+                        "new-password";
+
+                }
+
+
+                authMessage.textContent = "";
+
+            }
+        );
+
+
+        // Login / Create Account
+
+        authForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                authMessage.textContent =
+                    "Please wait...";
+
+
+                const userEmail =
+                    email.value.trim();
+
+                const userPassword =
+                    password.value;
+
+
+                // LOGIN
+
+                if (loginMode) {
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient.auth.signInWithPassword({
+
+                            email: userEmail,
+
+                            password: userPassword
+
+                        });
+
+
+                    if (error) {
+
+                        console.error(error);
+
+                        authMessage.textContent =
+                            "Login failed: " +
+                            error.message;
+
+                        return;
+
+                    }
+
+
+                    authMessage.textContent =
+                        "Login successful!";
+
+
+                    window.location.href =
+                        "dashboard.html";
+
+                    return;
+
+                }
+
+
+                // CREATE ACCOUNT
+
+                const name =
+                    fullName.value.trim();
+
+
+                if (!name) {
+
+                    authMessage.textContent =
+                        "Please enter your name.";
+
+                    return;
+
+                }
+
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth.signUp({
+
+                        email: userEmail,
+
+                        password: userPassword,
+
+                        options: {
+
+                            data: {
+
+                                full_name: name
+
+                            }
+
+                        }
+
+                    });
+
+
+                if (error) {
+
+                    console.error(error);
+
+                    authMessage.textContent =
+                        "Signup failed: " +
+                        error.message;
+
+                    return;
+
+                }
+
+
+                authMessage.textContent =
+                    "Account created! Please check your email to verify your account.";
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
